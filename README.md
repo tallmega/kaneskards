@@ -1,62 +1,86 @@
 # Kane's Kards
 
-A small Android flashcard app for early reading practice. Choose one of three levels, read each card, and move through the deck at your own pace.
+Kane's Kards is a small, offline Android reading-practice app. It is designed for short kindergarten-friendly practice rounds and does not use ads, accounts, or network services in the app.
 
-## Levels
+## What it does
 
-- **Level 1 — Short Sight Words:** common 3–4 letter words.
-- **Level 2 — Medium Sight Words:** common 5–6 letter words.
-- **Level 3 — Big Sight Words:** longer words with 7 or more letters.
+- Provides three progressive reading levels:
+  - **Level 1:** short sight words and early-reader sentences using words of four letters or fewer.
+  - **Level 2:** medium sight words and sentences using vocabulary from Levels 1–2, up to six letters.
+  - **Level 3:** longer sight words and more challenging sentences using all earlier vocabulary.
+- Lets the child choose **Words** or **Sentences** after selecting a level.
+- Includes 100 shuffled word cards and 100 shuffled sentence cards in every level.
+- Uses a configurable practice round of **5–50 cards**, in steps of five. The default is **10 cards** and the choice is saved on the device.
+- Uses **Got it!** and **Try Again** buttons. Missed cards form a review round and repeat until marked correct.
+- Shows a fireworks celebration after all cards in the round have been completed.
+- Keeps the active deck, round, card, and review queue when the phone rotates.
 
-## Change the cards
+## Using the app
 
-Edit [FlashcardData.kt](app/src/main/java/com/example/flashcards/FlashcardData.kt) for word decks or [SentenceData.kt](app/src/main/java/com/example/flashcards/SentenceData.kt) for the 100-sentence decks, then rebuild and reinstall the app. Each word level has a `wordCards` list, for example:
+1. On the home screen, open **Settings** to choose the number of cards per practice round.
+2. Choose a level, then choose **Words** or **Sentences**.
+3. Read the card aloud and select **Got it!** or **Try Again**.
+4. Complete any review cards to finish the round.
+5. On the celebration screen, choose **Play another** for a fresh shuffled round or return to **Levels**.
+
+## Updating decks
+
+- Word decks and level metadata are in [FlashcardData.kt](app/src/main/java/com/example/flashcards/FlashcardData.kt).
+- The 100 sentence cards for each level are in [SentenceData.kt](app/src/main/java/com/example/flashcards/SentenceData.kt).
+
+Word cards use the following format:
 
 ```kotlin
 wordCards = listOf("cat", "dog", "sun").map { Flashcard(prompt = it) }
 ```
 
-Cards can also use an answer and a hint for future question/answer decks:
+Sentence cards are plain strings:
 
 ```kotlin
-Flashcard(prompt = "What color is the sky?", answer = "Blue", hint = "Look up!")
+val levelOne = listOf("I see a cat.", "The cat can run.")
 ```
 
-## Build an APK without installing Android tools
+Keep each sentence list at 100 cards and preserve the intended vocabulary progression when editing.
 
-This project includes a GitHub Actions workflow that builds the app on GitHub's servers. It is the easiest option when you do not want to install Android Studio, the Android SDK, Java, or Gradle locally.
+## Build a signed APK with GitHub Actions
 
-1. Create a new repository on GitHub, then upload this project folder to it from the browser.
-2. Open the repository's **Actions** tab and enable workflows if GitHub asks.
-3. Select **Build Android APK** from the left sidebar and press **Run workflow**.
-4. When it finishes, open the workflow run and download the `Kanes-Kards-release-apk` artifact.
-5. Move the downloaded `app-release.apk` to your Android phone, open it, and install it.
+The repository includes a GitHub Actions workflow that builds a signed release APK on GitHub's servers. No Android Studio, Android SDK, or local Gradle setup is required.
 
-Android will ask you to allow the browser or Files app to install apps from that source because this APK is not delivered through Google Play. You can revoke that permission afterwards.
+### One-time signing setup
 
-## One-time release-signing setup
+The local signing key is intentionally excluded from Git. It lives at `signing/kanes-kards-release.jks`, and the matching values are stored in the ignored `.env` file. Keep secure backups of both files; losing the key prevents future APKs from upgrading the installed app.
 
-The workflow creates a signed release APK, so GitHub needs the private key as repository secrets. Generate this key once, keep a secure backup, and never commit or share the `.jks` file.
+In GitHub, open **Settings → Secrets and variables → Actions** and add the following repository secrets. Copy each value from the matching line in the local `.env` file.
 
-In PowerShell, run the following and choose a strong password when prompted. Use `kanes-kards` for the alias.
-
-```powershell
-keytool -genkeypair -v -keystore "$HOME\kanes-kards-release.jks" -alias kanes-kards -keyalg RSA -keysize 2048 -validity 10000
-```
-
-Then copy the key's Base64 value to your clipboard:
-
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\kanes-kards-release.jks")) | Set-Clipboard
-```
-
-In GitHub, open the repository's **Settings → Secrets and variables → Actions** and add these repository secrets:
-
-| Secret | Value |
+| GitHub secret | Local `.env` value |
 | --- | --- |
-| `ANDROID_KEYSTORE_BASE64` | The Base64 value on your clipboard |
-| `ANDROID_KEYSTORE_PASSWORD` | The keystore password you chose |
-| `ANDROID_KEY_ALIAS` | `kanes-kards` |
-| `ANDROID_KEY_PASSWORD` | The key password you chose |
+| `ANDROID_KEYSTORE_BASE64` | `ANDROID_KEYSTORE_BASE64` |
+| `ANDROID_KEYSTORE_PASSWORD` | `ANDROID_KEYSTORE_PASSWORD` |
+| `ANDROID_KEY_ALIAS` | `ANDROID_KEY_ALIAS` |
+| `ANDROID_KEY_PASSWORD` | `ANDROID_KEY_PASSWORD` |
 
-Once those secrets are set, each successful workflow run provides a `Kanes-Kards-release-apk` artifact. After replacing the currently installed debug build once, later versions can be upgraded with `adb install -r`.
+Never commit, email, or share `.env`, the `.jks` key, or their contents.
+
+### Create and download a build
+
+1. Commit and push the tracked project changes to the `main` branch.
+2. Open the repository's **Actions** tab and select **Build Android APK**. A push starts it automatically; it can also be run manually.
+3. When the build succeeds, download the `Kanes-Kards-release-apk` artifact.
+4. Extract the artifact and use `app-release.apk` to install the app.
+
+## Install and update with ADB
+
+Connect an Android phone with USB debugging enabled, then use the Android SDK Platform-Tools from a Windows PowerShell prompt.
+
+The first signed release replaces the previous debug build, so remove the debug version once:
+
+```powershell
+.\adb.exe uninstall com.kaneskards.app
+.\adb.exe install "C:\path\to\app-release.apk"
+```
+
+Later signed releases use the same key and can upgrade in place, preserving app data:
+
+```powershell
+.\adb.exe install -r "C:\path\to\app-release.apk"
+```
