@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.random.Random
 
 private val Navy = Color(0xFF15324A)
 private val Sky = Color(0xFFDDF2FF)
@@ -54,13 +57,16 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun KanesKardsApp() {
-    var selectedLevel by remember { mutableStateOf<CardLevel?>(null) }
+    var selectedLevelNumber by rememberSaveable { mutableStateOf<Int?>(null) }
+    val selectedLevel = selectedLevelNumber?.let { number ->
+        FlashcardData.levels.firstOrNull { it.number == number }
+    }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = Sky) {
             selectedLevel?.let { level ->
-                StudyScreen(level = level, onBack = { selectedLevel = null })
-            } ?: LevelMenu(onLevelSelected = { selectedLevel = it })
+                StudyScreen(level = level, onBack = { selectedLevelNumber = null })
+            } ?: LevelMenu(onLevelSelected = { selectedLevelNumber = it.number })
         }
     }
 }
@@ -68,10 +74,13 @@ private fun KanesKardsApp() {
 @Composable
 private fun LevelMenu(onLevelSelected: (CardLevel) -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 42.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp, vertical = 42.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Kanes Kards", fontSize = 38.sp, fontWeight = FontWeight.ExtraBold, color = Navy)
+        Text("Kane's Kards", fontSize = 38.sp, fontWeight = FontWeight.ExtraBold, color = Navy)
         Text("Pick a level and start reading!", fontSize = 18.sp, color = Navy)
         Spacer(Modifier.height(34.dp))
         FlashcardData.levels.forEachIndexed { index, level ->
@@ -106,9 +115,13 @@ private fun LevelButton(level: CardLevel, color: Color, onClick: () -> Unit) {
 
 @Composable
 private fun StudyScreen(level: CardLevel, onBack: () -> Unit) {
-    var cardIndex by remember(level) { mutableIntStateOf(0) }
-    var answerVisible by remember(level, cardIndex) { mutableStateOf(false) }
-    val card = level.cards[cardIndex]
+    // A new seed is made for each new study session. Save it so rotation keeps the same order.
+    val shuffleSeed = rememberSaveable(level.number) { Random.nextInt() }
+    val cards = remember(level, shuffleSeed) { level.cards.shuffled(Random(shuffleSeed)) }
+    var cardIndex by rememberSaveable(level.number, shuffleSeed) { mutableIntStateOf(0) }
+    var answerVisible by rememberSaveable(level.number, shuffleSeed, cardIndex) { mutableStateOf(false) }
+    val card = cards[cardIndex]
+    val canFlip = card.answer != null
 
     Column(
         modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 36.dp),
@@ -117,10 +130,15 @@ private fun StudyScreen(level: CardLevel, onBack: () -> Unit) {
         OutlinedButton(onClick = onBack, modifier = Modifier.align(Alignment.Start)) { Text("← Levels") }
         Spacer(Modifier.height(18.dp))
         Text("Level ${level.number}: ${level.title}", fontSize = 23.sp, fontWeight = FontWeight.Bold, color = Navy)
-        Text("${cardIndex + 1} of ${level.cards.size}", color = Navy)
+        Text("${cardIndex + 1} of ${cards.size}", color = Navy)
         Spacer(Modifier.height(28.dp))
         Card(
-            modifier = Modifier.weight(1f).fillMaxWidth().clickable { answerVisible = !answerVisible },
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .then(
+                    if (canFlip) Modifier.clickable { answerVisible = !answerVisible } else Modifier,
+                ),
             shape = RoundedCornerShape(30.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -128,14 +146,18 @@ private fun StudyScreen(level: CardLevel, onBack: () -> Unit) {
             Box(modifier = Modifier.fillMaxSize().padding(28.dp), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = if (answerVisible && card.answer != null) card.answer else card.prompt,
+                        text = if (answerVisible && canFlip) card.answer.orEmpty() else card.prompt,
                         fontSize = 58.sp,
                         lineHeight = 68.sp,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.ExtraBold,
                         color = Navy,
                     )
-                    val helper = if (answerVisible) card.hint else "Tap the card to flip it"
+                    val helper = when {
+                        !canFlip -> null
+                        answerVisible -> card.hint ?: "Tap the card to see the question"
+                        else -> "Tap the card to flip it"
+                    }
                     if (!helper.isNullOrBlank()) {
                         Spacer(Modifier.height(18.dp))
                         Text(helper, fontSize = 17.sp, textAlign = TextAlign.Center, color = Navy)
@@ -152,7 +174,7 @@ private fun StudyScreen(level: CardLevel, onBack: () -> Unit) {
             ) { Text("Previous") }
             Button(
                 onClick = { cardIndex++; answerVisible = false },
-                enabled = cardIndex < level.cards.lastIndex,
+                enabled = cardIndex < cards.lastIndex,
                 colors = ButtonDefaults.buttonColors(containerColor = Navy),
             ) { Text("Next") }
         }

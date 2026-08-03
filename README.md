@@ -1,4 +1,4 @@
-# Kanes Kards
+# Kane's Kards
 
 A small Android flashcard app for early reading practice. Choose one of three levels, read each card, and move through the deck at your own pace.
 

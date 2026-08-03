@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Kanes Kards"
+rootProject.name = "Kane's Kards"
 include(":app")
