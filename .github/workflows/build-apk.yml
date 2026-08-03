@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android release
 
 on:
   workflow_dispatch:
@@ -24,6 +24,12 @@ jobs:
           java-version: '17'
           cache: gradle
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android API 36
+        run: sdkmanager "platforms;android-36"
+
       # Gradle is downloaded only on GitHub's build runner.
       - name: Download Gradle
         run: |
@@ -37,15 +43,23 @@ jobs:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/kanes-kards-release.jks"
 
-      - name: Build signed APK
+      - name: Build signed app bundle and APK
         env:
           ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/kanes-kards-release.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: /tmp/gradle-8.11.1/bin/gradle --no-daemon assembleRelease
+        run: /tmp/gradle-8.11.1/bin/gradle --no-daemon bundleRelease assembleRelease
 
-      - name: Upload APK
+      - name: Upload Play bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kanes-Kards-release-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload installable APK
         uses: actions/upload-artifact@v4
         with:
           name: Kanes-Kards-release-apk

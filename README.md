@@ -65,8 +65,15 @@ Never commit, email, or share `.env`, the `.jks` key, or their contents.
 
 1. Commit and push the tracked project changes to the `main` branch.
 2. Open the repository's **Actions** tab and select **Build Android APK**. A push starts it automatically; it can also be run manually.
-3. When the build succeeds, download the `Kanes-Kards-release-apk` artifact.
-4. Extract the artifact and use `app-release.apk` to install the app.
+3. When the build succeeds, download `Kanes-Kards-release-aab` to upload `app-release.aab` to Google Play.
+4. Download `Kanes-Kards-release-apk` only when you need to install directly with ADB.
+
+## Google Play publishing
+
+- Upload `app-release.aab` to a Play testing or production track; Google Play requires new apps to use an Android App Bundle.
+- Enroll in Play App Signing and use the generated local release key as the upload key.
+- This app is designed for young children: select the appropriate child age group in Play Console, complete the Data safety form with the app's actual no-data practices, and provide this public policy URL after pushing the file: `https://github.com/tallmega/kaneskards/blob/main/privacy-policy.md`.
+- Create the required Play listing assets, including a 512×512 store icon, screenshots, and a feature graphic.
 
 ## Install and update with ADB
 
