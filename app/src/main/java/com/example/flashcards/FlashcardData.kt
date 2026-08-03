@@ -1,7 +1,7 @@
 package com.kaneskards.app
 
 /**
- * The app's card data lives here. Replace or add cards, then rebuild the app.
+ * The app's word-card data lives here. Sentence cards are in [SentenceData].
  * [answer] and [hint] are optional so these can later become question/answer cards.
  */
 data class Flashcard(
@@ -10,12 +10,23 @@ data class Flashcard(
     val hint: String? = null,
 )
 
+enum class DeckType(val title: String, val description: String) {
+    Words(title = "Words", description = "Practice single sight words."),
+    Sentences(title = "Sentences", description = "Read short sentences."),
+}
+
 data class CardLevel(
     val number: Int,
     val title: String,
     val description: String,
-    val cards: List<Flashcard>,
-)
+    val wordCards: List<Flashcard>,
+    val sentenceCards: List<Flashcard>,
+) {
+    fun cardsFor(deckType: DeckType): List<Flashcard> = when (deckType) {
+        DeckType.Words -> wordCards
+        DeckType.Sentences -> sentenceCards
+    }
+}
 
 object FlashcardData {
     val levels = listOf(
@@ -23,7 +34,7 @@ object FlashcardData {
             number = 1,
             title = "Short Sight Words",
             description = "Read common 3–4 letter words.",
-            cards = listOf(
+            wordCards = listOf(
                 "the", "and", "for", "you", "are", "not", "with", "have", "this", "from",
                 "they", "said", "what", "when", "were", "your", "come", "some", "want",
                 "like", "look", "make", "play", "help", "here", "away", "over", "give", "live",
@@ -36,12 +47,13 @@ object FlashcardData {
                 "soon", "than", "that", "too", "try", "use", "very", "walk", "wash", "who", "wish",
             )
                 .map { Flashcard(prompt = it) },
+            sentenceCards = SentenceData.levelOne.map { Flashcard(prompt = it) },
         ),
         CardLevel(
             number = 2,
             title = "Medium Sight Words",
             description = "Read common 5–6 letter words.",
-            cards = listOf(
+            wordCards = listOf(
                 "about", "after", "again", "could", "every", "first", "found", "great", "house", "large",
                 "learn", "other", "place", "right", "small", "still", "their", "these", "three", "where",
                 "which", "while", "world", "would", "write", "bring", "carry", "clean", "close", "drink",
@@ -54,12 +66,13 @@ object FlashcardData {
                 "winter", "woman", "yellow", "zebra", "across", "animal", "answer", "become", "behind", "below",
             )
                 .map { Flashcard(prompt = it) },
+            sentenceCards = SentenceData.levelTwo.map { Flashcard(prompt = it) },
         ),
         CardLevel(
             number = 3,
             title = "Big Sight Words",
             description = "Read longer 7+ letter words.",
-            cards = listOf(
+            wordCards = listOf(
                 "because", "another", "different", "important", "children", "beautiful", "together", "remember",
                 "something", "favorite", "everywhere", "afternoon", "interesting", "sometimes", "everyone", "tomorrow",
                 "anything", "answering", "birthday", "building", "brother", "catching", "chapter", "climbing",
@@ -74,6 +87,7 @@ object FlashcardData {
                 "present", "rainbow", "station", "straight", "surprise", "swimming", "tuesday", "usually", "village", "weekdays",
             )
                 .map { Flashcard(prompt = it) },
+            sentenceCards = SentenceData.levelThree.map { Flashcard(prompt = it) },
         ),
     )
 }

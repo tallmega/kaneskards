@@ -94,10 +94,12 @@ private fun KanesKardsApp() {
         )
     }
     var selectedLevelNumber by rememberSaveable { mutableStateOf<Int?>(null) }
+    var selectedDeckName by rememberSaveable { mutableStateOf<String?>(null) }
     var showingSettings by rememberSaveable { mutableStateOf(false) }
     val selectedLevel = selectedLevelNumber?.let { number ->
         FlashcardData.levels.firstOrNull { it.number == number }
     }
+    val selectedDeck = selectedDeckName?.let { name -> DeckType.entries.firstOrNull { it.name == name } }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = Sky) {
@@ -110,17 +112,60 @@ private fun KanesKardsApp() {
                     },
                     onBack = { showingSettings = false },
                 )
-                selectedLevel != null -> StudyScreen(
+                selectedLevel != null && selectedDeck != null -> StudyScreen(
                     level = selectedLevel,
+                    deckType = selectedDeck,
+                    cards = selectedLevel.cardsFor(selectedDeck),
                     roundSize = roundSize,
+                    onBack = { selectedDeckName = null },
+                )
+                selectedLevel != null -> DeckPicker(
+                    level = selectedLevel,
+                    onDeckSelected = { selectedDeckName = it.name },
                     onBack = { selectedLevelNumber = null },
                 )
                 else -> LevelMenu(
                     roundSize = roundSize,
-                    onLevelSelected = { selectedLevelNumber = it.number },
+                    onLevelSelected = {
+                        selectedLevelNumber = it.number
+                        selectedDeckName = null
+                    },
                     onSettings = { showingSettings = true },
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun DeckPicker(level: CardLevel, onDeckSelected: (DeckType) -> Unit, onBack: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 36.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        OutlinedButton(onClick = onBack, modifier = Modifier.align(Alignment.Start)) { Text("← Levels") }
+        Spacer(Modifier.height(34.dp))
+        Text("Level ${level.number}", fontSize = 36.sp, fontWeight = FontWeight.ExtraBold, color = Navy)
+        Text(level.title, fontSize = 20.sp, color = Navy)
+        Spacer(Modifier.height(38.dp))
+        DeckType.entries.forEachIndexed { index, deckType ->
+            Card(
+                modifier = Modifier.fillMaxWidth().clickable { onDeckSelected(deckType) },
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = if (index == 0) Coral else Gold),
+            ) {
+                Column(modifier = Modifier.padding(26.dp)) {
+                    Text(deckType.title, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Navy)
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        if (deckType == DeckType.Sentences) "100 simple sentences using this level's vocabulary."
+                        else deckType.description,
+                        fontSize = 16.sp,
+                        color = Navy,
+                    )
+                }
+            }
+            Spacer(Modifier.height(18.dp))
         }
     }
 }
@@ -204,19 +249,25 @@ private fun LevelButton(level: CardLevel, color: Color, onClick: () -> Unit) {
 }
 
 @Composable
-private fun StudyScreen(level: CardLevel, roundSize: Int, onBack: () -> Unit) {
-    var sessionNumber by rememberSaveable(level.number, roundSize) { mutableIntStateOf(0) }
-    val shuffleSeed = rememberSaveable(level.number, roundSize, sessionNumber) { Random.nextInt() }
-    val sessionCards = remember(level, shuffleSeed) {
-        level.cards.shuffled(Random(shuffleSeed)).take(roundSize.coerceAtMost(level.cards.size))
+private fun StudyScreen(
+    level: CardLevel,
+    deckType: DeckType,
+    cards: List<Flashcard>,
+    roundSize: Int,
+    onBack: () -> Unit,
+) {
+    var sessionNumber by rememberSaveable(level.number, deckType.name, roundSize) { mutableIntStateOf(0) }
+    val shuffleSeed = rememberSaveable(level.number, deckType.name, roundSize, sessionNumber) { Random.nextInt() }
+    val sessionCards = remember(cards, shuffleSeed) {
+        cards.shuffled(Random(shuffleSeed)).take(roundSize.coerceAtMost(cards.size))
     }
-    var round by rememberSaveable(level.number, roundSize, sessionNumber) { mutableStateOf(InitialRound) }
-    var initialCardIndex by rememberSaveable(level.number, roundSize, sessionNumber) { mutableIntStateOf(0) }
-    var reviewQueue by rememberSaveable(level.number, roundSize, sessionNumber) { mutableStateOf(emptyList<Int>()) }
+    var round by rememberSaveable(level.number, deckType.name, roundSize, sessionNumber) { mutableStateOf(InitialRound) }
+    var initialCardIndex by rememberSaveable(level.number, deckType.name, roundSize, sessionNumber) { mutableIntStateOf(0) }
+    var reviewQueue by rememberSaveable(level.number, deckType.name, roundSize, sessionNumber) { mutableStateOf(emptyList<Int>()) }
 
     if (round == CompleteRound) {
         CompletionScreen(
-            sessionKey = "${level.number}-$roundSize-$sessionNumber",
+            sessionKey = "${level.number}-${deckType.name}-$roundSize-$sessionNumber",
             roundSize = sessionCards.size,
             onPlayAnother = { sessionNumber++ },
             onBack = onBack,
@@ -264,7 +315,8 @@ private fun StudyScreen(level: CardLevel, roundSize: Int, onBack: () -> Unit) {
     ) {
         OutlinedButton(onClick = onBack, modifier = Modifier.align(Alignment.Start)) { Text("← Levels") }
         Spacer(Modifier.height(18.dp))
-        Text("Level ${level.number}: ${level.title}", fontSize = 23.sp, fontWeight = FontWeight.Bold, color = Navy)
+        Text("Level ${level.number} · ${deckType.title}", fontSize = 23.sp, fontWeight = FontWeight.Bold, color = Navy)
+        Text(level.title, color = Navy)
         Text(progressText, color = Navy)
         Spacer(Modifier.height(28.dp))
         Card(
@@ -279,8 +331,8 @@ private fun StudyScreen(level: CardLevel, roundSize: Int, onBack: () -> Unit) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = card.prompt,
-                        fontSize = 58.sp,
-                        lineHeight = 68.sp,
+                        fontSize = if (deckType == DeckType.Sentences) 34.sp else 58.sp,
+                        lineHeight = if (deckType == DeckType.Sentences) 44.sp else 68.sp,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.ExtraBold,
                         color = Navy,

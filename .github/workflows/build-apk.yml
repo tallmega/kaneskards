@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build debug APK
+    name: Build signed release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -24,8 +24,7 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      # The project intentionally has no local Gradle installation or wrapper.
-      # This downloads Gradle only on GitHub's build runner.
+      # Gradle is downloaded only on GitHub's build runner.
       - name: Download Gradle
         run: |
           curl --fail --silent --show-error --location \
@@ -33,13 +32,23 @@ jobs:
             --output /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
 
-      - name: Build APK
-        run: /tmp/gradle-8.11.1/bin/gradle --no-daemon assembleDebug
+      - name: Decode signing key
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/kanes-kards-release.jks"
+
+      - name: Build signed APK
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/kanes-kards-release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: /tmp/gradle-8.11.1/bin/gradle --no-daemon assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Kanes-Kards-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: Kanes-Kards-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 30

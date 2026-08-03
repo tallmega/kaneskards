@@ -1,0 +1,73 @@
+package com.kaneskards.app
+
+/** Controlled reading sentences for the three progressive levels. */
+object SentenceData {
+    val levelOne = listOf(
+        "I see a cat.", "The cat can run.", "The dog can run.", "I can hop and hop.", "We can dig in mud.",
+        "The sun is hot.", "I see a big pig.", "The pig is in mud.", "A hen can sit.", "The hen has an egg.",
+        "The fox can hop.", "The bug is on a log.", "I can pat the dog.", "The dog can wag.", "A bat can fly.",
+        "The bat is not bad.", "I see the red bus.", "The bus is big.", "We can get on.", "I can go with you.",
+        "The kid can run.", "The kid can jump.", "I can clap for you.", "The man can jog.", "The man has a hat.",
+        "The hat is red.", "I see a map.", "The map is on the desk.", "The cup is full.", "I can sip from it.",
+        "Jam is on a bun.", "I can eat jam.", "The bed is soft.", "I can nap on it.", "The rug is soft.",
+        "The box is big.", "The box has a lid.", "I can put it in.", "The fan can hum.", "The fan is on.",
+        "The moon is up.", "The sky is dark.", "I can see a star.", "The star is far.", "We can look up.",
+        "The fish can swim.", "The fish is in a tank.", "The frog can hop.", "The frog is wet.", "The duck can dip.",
+        "The duck is on a pond.", "I can see a bee.", "The bee can buzz.", "The bee is not near.", "The cow can moo.",
+        "The cow can eat hay.", "The goat can run.", "The goat is on a hill.", "The ram has big ears.", "The ram can run.",
+        "I like to play.", "We like to play.", "I can play tag.", "You can play too.", "We can take a turn.",
+        "I can help you.", "You can help me.", "We can make a fort.", "The fort is fun.", "I can make art.",
+        "The art is on the wall.", "I can read this.", "You can read this.", "We can look at a book.", "The book is new.",
+        "I can tell a tale.", "The tale is fun.", "We can sing a song.", "The song is good.", "I can tap my feet.",
+        "I can wash up.", "You can wash too.", "The soap is wet.", "The tub is full.", "I can use a cup.",
+        "The day is warm.", "The wind can blow.", "The rain can fall.", "I can put on a coat.", "The coat is dry.",
+        "I have a pet.", "My pet is a cat.", "The cat can nap.", "I feed my pet.", "My pet is glad.",
+        "We can go home.", "Home is near.", "I see Mom and Dad.", "Mom can cook.", "Dad can help.",
+    )
+
+    val levelTwo = listOf(
+        "My family eats dinner.", "Mother reads a story.", "Father makes dinner.", "People laugh at funny jokes.", "Every child can help.",
+        "Please close the door.", "Please bring my water.", "We should thank Mother.", "I would like a cookie.", "Could you help me?",
+        "The yellow bus is early.", "A purple flower grows.", "The orange cat sleeps.", "The little zebra runs.", "A rabbit hides inside.",
+        "The puppy found a bone.", "The kitten likes water.", "The horse can carry people.", "A gentle animal needs care.", "Every animal needs water.",
+        "I found a small stone.", "The round stone feels smooth.", "Please place it here.", "The paper is clean.", "Write your name here.",
+        "We learn about space.", "The world is very large.", "The river runs under a span.", "Winter days feel cold.", "Summer days feel warm.",
+        "Spring brings green leaves.", "Autumn has red leaves.", "The season can change.", "Today we see rain.", "Next day may be sunny.",
+        "My friend can smile.", "Pals share their toys.", "We should take turns.", "A kind friend will listen.", "Never leave a friend out.",
+        "The guide reads slowly.", "The class can listen.", "We write a short story.", "A story can be funny.", "Every page has words.",
+        "I enjoy books.", "Books help me learn.", "Please choose a book.", "This book is about space.", "That book has pets.",
+        "The baby has a cover.", "The cover feels soft.", "Mother sings softly.", "The baby falls asleep.", "We all rest at night.",
+        "We carry bags to school.", "The school has a book room.", "The room has many books.", "Please return your books.", "The number is on the page.",
+        "I can count to eleven.", "Eight birds sit nearby.", "Three birds fly away.", "Every bird has wings.", "Which bird is your best pet?",
+        "The queen wears purple.", "The king lives nearby.", "The castle has a tower.", "A dragon can blow fire.", "The brave knight rides home.",
+        "We follow the path.", "The path goes around trees.", "Please walk behind me.", "The bridge is below us.", "The hill is very steep.",
+        "I heard a loud sound.", "The music makes me happy.", "My cousin can dance.", "We laugh and sing.", "The party feels great.",
+        "The room is clean.", "Dinner smells good.", "Please wash the dishes.", "Father will cook later.", "The table is ready.",
+        "My sister likes games.", "My sister likes books.", "Our family plays in the yard.", "We never play too rough.", "We all come home.",
+        "The quiet room feels calm.", "I can think and rest.", "A smile can make peace.", "Kind words make pals.", "We should always be kind.",
+        "I want to become brave.", "Daily work makes skills grow.", "Try again when work feels hard.", "You can tell the answer.", "School takes time.",
+    )
+
+    val levelThree = listOf(
+        "Children remember the story.", "Everyone enjoys the beautiful rainbow.", "Another morning brings adventure.", "Sometimes children play together.", "Tomorrow we visit the library.",
+        "Because the weather changed, we stayed inside.", "The teacher explained the important question.", "Different animals live in different places.", "Something exciting happened after school.", "My favourite chapter has a dragon.",
+        "The birthday celebration was special.", "Grandma brought a beautiful present.", "My brother decorated the kitchen.", "Everyone sang during the afternoon.", "The children opened colourful packages.",
+        "We travelled through the country.", "The journey included a mountain path.", "Our parents packed everything carefully.", "The airport was crowded that morning.", "A helpful worker carried our blanket.",
+        "The teacher described the science project.", "Our group discussed the problem together.", "Each student completed an experiment.", "The example made the lesson clearer.", "Finally, we recorded our answer.",
+        "Reading every evening builds language skills.", "Interesting books introduce different worlds.", "The librarian recommended another adventure.", "My favourite character solved problems.", "Sometimes I remember every detail.",
+        "The bicycle needed careful cleaning.", "Brother practiced climbing the hill.", "The playground became crowded quickly.", "Friends enjoyed swimming after school.", "Everyone rested after exercising.",
+        "A rainbow appeared after the weather cleared.", "The electric lights brightened the station.", "The village celebrated its history.", "Visitors explored the ancient building.", "The guide explained each picture.",
+        "The children listened during the lesson.", "Their teacher answered every question.", "A difficult problem needs practice.", "Usually, patience brings progress.", "Nothing feels better than learning.",
+        "Our family planned a holiday journey.", "Mother prepared sandwiches for everyone.", "Father checked the luggage carefully.", "We arrived before the afternoon traffic.", "The hotel welcomed our family warmly.",
+        "The gardener planted vegetables outside.", "Beautiful flowers attracted butterflies.", "A frightened rabbit hid nearby.", "The children watched quietly from inside.", "Everyone remembered to close the gate.",
+        "The school organized a reading challenge.", "Students collected points for finishing books.", "Another classroom joined the challenge.", "The principal congratulated every reader.", "The celebration included colourful balloons.",
+        "During January, the weather was freezing.", "Children wore jackets and blankets.", "The morning sunlight sparkled everywhere.", "Afterwards, everyone drank something warm.", "Sometimes winter feels especially peaceful.",
+        "The museum displayed a giant dinosaur.", "Visitors followed the history timeline.", "An interesting guide described each creature.", "Children asked thoughtful questions.", "The experience inspired another visit.",
+        "The football practice started early.", "Everyone remembered their equipment.", "The coach encouraged teamwork and kindness.", "A difficult exercise improved balance.", "Finally, the players celebrated together.",
+        "My sister created a colourful picture.", "She carefully selected every crayon.", "The finished drawing showed a mountain.", "Grandma placed it beside the window.", "Everyone admired the beautiful artwork.",
+        "The doctor explained the medicine carefully.", "Parents listened to the important instructions.", "Children sometimes need extra rest.", "A healthy breakfast provides energy.", "Walking outside improves everyone’s feeling.",
+        "The community built a new playground.", "Volunteers painted the equipment brightly.", "Families arrived during the opening celebration.", "Children climbed, laughed, and played.", "The neighbourhood felt more connected.",
+        "A detective followed mysterious footprints.", "Another clue appeared beside the station.", "The clever detective solved the problem.", "Everyone celebrated the exciting answer.", "The newspaper printed the story tomorrow.",
+        "Practice helps musicians become confident.", "Listening carefully improves every performance.", "The audience enjoyed the wonderful concert.", "Afterwards, the musicians thanked everyone.", "Remembering kind feedback encourages practice.",
+    )
+}
