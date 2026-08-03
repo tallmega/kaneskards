@@ -1,6 +1,7 @@
 package com.kaneskards.app
 
 import android.os.Bundle
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -27,6 +28,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +42,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.geometry.Offset
@@ -49,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -56,7 +60,11 @@ private val Navy = Color(0xFF15324A)
 private val Sky = Color(0xFFDDF2FF)
 private val Coral = Color(0xFFFF8A70)
 private val Gold = Color(0xFFFFD166)
-private const val RoundSize = 20
+private const val DefaultRoundSize = 10
+private const val RoundSizePreference = "round_size"
+private const val MinimumRoundSize = 5
+private const val MaximumRoundSize = 50
+private const val RoundSizeStep = 5
 private const val InitialRound = "initial"
 private const val ReviewRound = "review"
 private const val CompleteRound = "complete"
@@ -71,22 +79,54 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun KanesKardsApp() {
+    val context = LocalContext.current
+    val preferences = remember(context) {
+        context.getSharedPreferences("kanes_kards_settings", Context.MODE_PRIVATE)
+    }
+    val storedRoundSize = preferences.getInt(RoundSizePreference, DefaultRoundSize)
+    var roundSize by rememberSaveable {
+        mutableIntStateOf(
+            if (storedRoundSize in MinimumRoundSize..MaximumRoundSize && storedRoundSize % RoundSizeStep == 0) {
+                storedRoundSize
+            } else {
+                DefaultRoundSize
+            },
+        )
+    }
     var selectedLevelNumber by rememberSaveable { mutableStateOf<Int?>(null) }
+    var showingSettings by rememberSaveable { mutableStateOf(false) }
     val selectedLevel = selectedLevelNumber?.let { number ->
         FlashcardData.levels.firstOrNull { it.number == number }
     }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = Sky) {
-            selectedLevel?.let { level ->
-                StudyScreen(level = level, onBack = { selectedLevelNumber = null })
-            } ?: LevelMenu(onLevelSelected = { selectedLevelNumber = it.number })
+            when {
+                showingSettings -> SettingsScreen(
+                    roundSize = roundSize,
+                    onRoundSizeChanged = { newSize ->
+                        roundSize = newSize
+                        preferences.edit().putInt(RoundSizePreference, newSize).apply()
+                    },
+                    onBack = { showingSettings = false },
+                )
+                selectedLevel != null -> StudyScreen(
+                    level = selectedLevel,
+                    roundSize = roundSize,
+                    onBack = { selectedLevelNumber = null },
+                )
+                else -> LevelMenu(
+                    roundSize = roundSize,
+                    onLevelSelected = { selectedLevelNumber = it.number },
+                    onSettings = { showingSettings = true },
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun LevelMenu(onLevelSelected: (CardLevel) -> Unit) {
+private fun LevelMenu(roundSize: Int, onLevelSelected: (CardLevel) -> Unit, onSettings: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -96,6 +136,8 @@ private fun LevelMenu(onLevelSelected: (CardLevel) -> Unit) {
     ) {
         Text("Kane's Kards", fontSize = 38.sp, fontWeight = FontWeight.ExtraBold, color = Navy)
         Text("Pick a level and start reading!", fontSize = 18.sp, color = Navy)
+        Spacer(Modifier.height(12.dp))
+        OutlinedButton(onClick = onSettings) { Text("Settings · $roundSize cards") }
         Spacer(Modifier.height(34.dp))
         FlashcardData.levels.forEachIndexed { index, level ->
             LevelButton(level = level, color = if (index % 2 == 0) Coral else Gold) {
@@ -103,6 +145,40 @@ private fun LevelMenu(onLevelSelected: (CardLevel) -> Unit) {
             }
             Spacer(Modifier.height(16.dp))
         }
+    }
+}
+
+@Composable
+private fun SettingsScreen(roundSize: Int, onRoundSizeChanged: (Int) -> Unit, onBack: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 36.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        OutlinedButton(onClick = onBack, modifier = Modifier.align(Alignment.Start)) { Text("← Levels") }
+        Spacer(Modifier.height(32.dp))
+        Text("Settings", fontSize = 36.sp, fontWeight = FontWeight.ExtraBold, color = Navy)
+        Spacer(Modifier.height(10.dp))
+        Text("Words in each practice round", fontSize = 19.sp, color = Navy)
+        Spacer(Modifier.height(24.dp))
+        Text("$roundSize cards", fontSize = 42.sp, fontWeight = FontWeight.ExtraBold, color = Navy)
+        Slider(
+            value = roundSize.toFloat(),
+            onValueChange = { value ->
+                onRoundSizeChanged((value / RoundSizeStep).roundToInt() * RoundSizeStep)
+            },
+            valueRange = MinimumRoundSize.toFloat()..MaximumRoundSize.toFloat(),
+            steps = 8,
+        )
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("$MinimumRoundSize", color = Navy)
+            Text("$MaximumRoundSize", color = Navy)
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Choose 5 to 50 cards in steps of 5. Your choice is saved for the next time you play.",
+            textAlign = TextAlign.Center,
+            color = Navy,
+        )
     }
 }
 
@@ -128,19 +204,20 @@ private fun LevelButton(level: CardLevel, color: Color, onClick: () -> Unit) {
 }
 
 @Composable
-private fun StudyScreen(level: CardLevel, onBack: () -> Unit) {
-    var sessionNumber by rememberSaveable(level.number) { mutableIntStateOf(0) }
-    val shuffleSeed = rememberSaveable(level.number, sessionNumber) { Random.nextInt() }
+private fun StudyScreen(level: CardLevel, roundSize: Int, onBack: () -> Unit) {
+    var sessionNumber by rememberSaveable(level.number, roundSize) { mutableIntStateOf(0) }
+    val shuffleSeed = rememberSaveable(level.number, roundSize, sessionNumber) { Random.nextInt() }
     val sessionCards = remember(level, shuffleSeed) {
-        level.cards.shuffled(Random(shuffleSeed)).take(RoundSize.coerceAtMost(level.cards.size))
+        level.cards.shuffled(Random(shuffleSeed)).take(roundSize.coerceAtMost(level.cards.size))
     }
-    var round by rememberSaveable(level.number, sessionNumber) { mutableStateOf(InitialRound) }
-    var initialCardIndex by rememberSaveable(level.number, sessionNumber) { mutableIntStateOf(0) }
-    var reviewQueue by rememberSaveable(level.number, sessionNumber) { mutableStateOf(emptyList<Int>()) }
+    var round by rememberSaveable(level.number, roundSize, sessionNumber) { mutableStateOf(InitialRound) }
+    var initialCardIndex by rememberSaveable(level.number, roundSize, sessionNumber) { mutableIntStateOf(0) }
+    var reviewQueue by rememberSaveable(level.number, roundSize, sessionNumber) { mutableStateOf(emptyList<Int>()) }
 
     if (round == CompleteRound) {
         CompletionScreen(
-            sessionKey = "${level.number}-$sessionNumber",
+            sessionKey = "${level.number}-$roundSize-$sessionNumber",
+            roundSize = sessionCards.size,
             onPlayAnother = { sessionNumber++ },
             onBack = onBack,
         )
@@ -229,7 +306,7 @@ private fun StudyScreen(level: CardLevel, onBack: () -> Unit) {
 }
 
 @Composable
-private fun CompletionScreen(sessionKey: String, onPlayAnother: () -> Unit, onBack: () -> Unit) {
+private fun CompletionScreen(sessionKey: String, roundSize: Int, onPlayAnother: () -> Unit, onBack: () -> Unit) {
     var animationProgress by rememberSaveable(sessionKey) { mutableFloatStateOf(0f) }
 
     LaunchedEffect(sessionKey) {
@@ -247,13 +324,13 @@ private fun CompletionScreen(sessionKey: String, onPlayAnother: () -> Unit, onBa
     ) {
         Text("Great work!", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold, color = Navy)
         Spacer(Modifier.height(10.dp))
-        Text("You got all 20 words!", fontSize = 20.sp, color = Navy)
+        Text("You got all $roundSize words!", fontSize = 20.sp, color = Navy)
         Fireworks(progress = animationProgress)
         Button(
             onClick = onPlayAnother,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Navy),
-        ) { Text("Play another 20") }
+        ) { Text("Play another $roundSize") }
         Spacer(Modifier.height(12.dp))
         OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Levels") }
     }
