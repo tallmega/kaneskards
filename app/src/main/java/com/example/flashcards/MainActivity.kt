@@ -140,7 +140,7 @@ private fun KanesKardsApp() {
 @Composable
 private fun DeckPicker(level: CardLevel, onDeckSelected: (DeckType) -> Unit, onBack: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 36.dp),
+        modifier = Modifier.fillMaxSize().padding(start = 24.dp, top = 60.dp, end = 24.dp, bottom = 36.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         OutlinedButton(onClick = onBack, modifier = Modifier.align(Alignment.Start)) { Text("← Levels") }
@@ -196,7 +196,7 @@ private fun LevelMenu(roundSize: Int, onLevelSelected: (CardLevel) -> Unit, onSe
 @Composable
 private fun SettingsScreen(roundSize: Int, onRoundSizeChanged: (Int) -> Unit, onBack: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 36.dp),
+        modifier = Modifier.fillMaxSize().padding(start = 24.dp, top = 60.dp, end = 24.dp, bottom = 36.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         OutlinedButton(onClick = onBack, modifier = Modifier.align(Alignment.Start)) { Text("← Levels") }
@@ -310,7 +310,7 @@ private fun StudyScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 36.dp),
+        modifier = Modifier.fillMaxSize().padding(start = 24.dp, top = 60.dp, end = 24.dp, bottom = 36.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         OutlinedButton(onClick = onBack, modifier = Modifier.align(Alignment.Start)) { Text("← Levels") }
