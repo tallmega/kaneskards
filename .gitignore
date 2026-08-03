@@ -1,0 +1,6 @@
+# Private Android signing keys must never be committed.
+*.jks
+*.keystore
+keystore.properties
+.env
+signing/
