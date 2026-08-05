@@ -4,3 +4,4 @@
 keystore.properties
 .env
 signing/
+store-assets/
