@@ -5,11 +5,12 @@ Kane's Kards is a small, offline Android reading-practice app. It is designed fo
 ## What it does
 
 - Provides three progressive reading levels:
-  - **Level 1:** short sight words and early-reader sentences using words of four letters or fewer.
+  - **Level 1:** short sight words and early-reader sentences using words of two to four letters.
   - **Level 2:** medium sight words and sentences using vocabulary from Levels 1–2, up to six letters.
   - **Level 3:** longer sight words and more challenging sentences using all earlier vocabulary.
 - Lets the child choose **Words**, **Sentences**, or **Irregular Words** after selecting a level.
-- Includes at least 100 shuffled word cards and 100 shuffled sentence cards in every level. The Irregular Words deck offers focused practice with common tricky spellings.
+- Includes at least 100 shuffled word cards and 100 shuffled sentence cards in every level. The Irregular Words deck offers focused practice with common tricky spellings, and those words are also available in the normal Words decks.
+- The Irregular Words deck includes plain-word entries from UFLI's *Printable Cards for Irregular “Heart” Words*. Kane's Kards is independent and is not affiliated with, endorsed by, or sponsored by UFLI or the University of Florida.
 - Uses a configurable practice round of **5–50 cards**, in steps of five. The default is **10 cards** and the choice is saved on the device.
 - Uses **Got it!** and **Try Again** buttons. Missed cards form a review round and repeat until marked correct.
 - Shows a fireworks celebration after all cards in the round have been completed.
