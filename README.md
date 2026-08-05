@@ -8,8 +8,8 @@ Kane's Kards is a small, offline Android reading-practice app. It is designed fo
   - **Level 1:** short sight words and early-reader sentences using words of four letters or fewer.
   - **Level 2:** medium sight words and sentences using vocabulary from Levels 1–2, up to six letters.
   - **Level 3:** longer sight words and more challenging sentences using all earlier vocabulary.
-- Lets the child choose **Words** or **Sentences** after selecting a level.
-- Includes 100 shuffled word cards and 100 shuffled sentence cards in every level.
+- Lets the child choose **Words**, **Sentences**, or **Irregular Words** after selecting a level.
+- Includes at least 100 shuffled word cards and 100 shuffled sentence cards in every level. The Irregular Words deck offers focused practice with common tricky spellings.
 - Uses a configurable practice round of **5–50 cards**, in steps of five. The default is **10 cards** and the choice is saved on the device.
 - Uses **Got it!** and **Try Again** buttons. Missed cards form a review round and repeat until marked correct.
 - Shows a fireworks celebration after all cards in the round have been completed.
@@ -18,14 +18,14 @@ Kane's Kards is a small, offline Android reading-practice app. It is designed fo
 ## Using the app
 
 1. On the home screen, open **Settings** to choose the number of cards per practice round.
-2. Choose a level, then choose **Words** or **Sentences**.
+2. Choose a level, then choose **Words**, **Sentences**, or **Irregular Words**.
 3. Read the card aloud and select **Got it!** or **Try Again**.
 4. Complete any review cards to finish the round.
 5. On the celebration screen, choose **Play another** for a fresh shuffled round or return to **Levels**.
 
 ## Updating decks
 
-- Word decks and level metadata are in [FlashcardData.kt](app/src/main/java/com/example/flashcards/FlashcardData.kt).
+- Word decks and level metadata are in [FlashcardData.kt](app/src/main/java/com/example/flashcards/FlashcardData.kt). The dedicated irregular-word lists are in [IrregularWordData.kt](app/src/main/java/com/example/flashcards/IrregularWordData.kt).
 - The 100 sentence cards for each level are in [SentenceData.kt](app/src/main/java/com/example/flashcards/SentenceData.kt).
 
 Word cards use the following format:

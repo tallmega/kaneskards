@@ -140,7 +140,10 @@ private fun KanesKardsApp() {
 @Composable
 private fun DeckPicker(level: CardLevel, onDeckSelected: (DeckType) -> Unit, onBack: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(start = 24.dp, top = 60.dp, end = 24.dp, bottom = 36.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(start = 24.dp, top = 60.dp, end = 24.dp, bottom = 36.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         OutlinedButton(onClick = onBack, modifier = Modifier.align(Alignment.Start)) { Text("← Levels") }

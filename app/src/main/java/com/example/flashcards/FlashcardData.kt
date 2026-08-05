@@ -13,6 +13,7 @@ data class Flashcard(
 enum class DeckType(val title: String, val description: String) {
     Words(title = "Words", description = "Practice single sight words."),
     Sentences(title = "Sentences", description = "Read short sentences."),
+    IrregularWords(title = "Irregular Words", description = "Practice words with tricky spellings."),
 }
 
 data class CardLevel(
@@ -21,10 +22,12 @@ data class CardLevel(
     val description: String,
     val wordCards: List<Flashcard>,
     val sentenceCards: List<Flashcard>,
+    val irregularWordCards: List<Flashcard>,
 ) {
     fun cardsFor(deckType: DeckType): List<Flashcard> = when (deckType) {
         DeckType.Words -> wordCards
         DeckType.Sentences -> sentenceCards
+        DeckType.IrregularWords -> irregularWordCards
     }
 }
 
@@ -33,8 +36,8 @@ object FlashcardData {
         CardLevel(
             number = 1,
             title = "Short Sight Words",
-            description = "Read common 3–4 letter words.",
-            wordCards = listOf(
+            description = "Read common 2–4 letter words.",
+            wordCards = cardsForWords(listOf(
                 "the", "and", "for", "you", "are", "not", "with", "have", "this", "from",
                 "they", "said", "what", "when", "were", "your", "come", "some", "want",
                 "like", "look", "make", "play", "help", "here", "away", "over", "give", "live",
@@ -45,15 +48,15 @@ object FlashcardData {
                 "her", "him", "his", "how", "into", "its", "let", "may", "new", "now",
                 "off", "old", "one", "our", "out", "own", "put", "say", "she", "show",
                 "soon", "than", "that", "too", "try", "use", "very", "walk", "wash", "who", "wish",
-            )
-                .map { Flashcard(prompt = it) },
+            ) + IrregularWordData.levelOneWords),
             sentenceCards = SentenceData.levelOne.map { Flashcard(prompt = it) },
+            irregularWordCards = cardsForWords(IrregularWordData.levelOneWords),
         ),
         CardLevel(
             number = 2,
             title = "Medium Sight Words",
             description = "Read common 5–6 letter words.",
-            wordCards = listOf(
+            wordCards = cardsForWords(listOf(
                 "about", "after", "again", "could", "every", "first", "found", "great", "house", "large",
                 "learn", "other", "place", "right", "small", "still", "their", "these", "three", "where",
                 "which", "while", "world", "would", "write", "bring", "carry", "clean", "close", "drink",
@@ -64,15 +67,15 @@ object FlashcardData {
                 "inside", "itself", "maybe", "minute", "monday", "number", "orange", "please", "pretty", "purple",
                 "queen", "river", "season", "second", "seven", "smile", "spring", "summer", "things", "today",
                 "winter", "woman", "yellow", "zebra", "across", "animal", "answer", "become", "behind", "below",
-            )
-                .map { Flashcard(prompt = it) },
+            ) + IrregularWordData.levelTwoWords),
             sentenceCards = SentenceData.levelTwo.map { Flashcard(prompt = it) },
+            irregularWordCards = cardsForWords(IrregularWordData.levelTwoWords),
         ),
         CardLevel(
             number = 3,
             title = "Big Sight Words",
             description = "Read longer 7+ letter words.",
-            wordCards = listOf(
+            wordCards = cardsForWords(listOf(
                 "because", "another", "different", "important", "children", "beautiful", "together", "remember",
                 "something", "favorite", "everywhere", "afternoon", "interesting", "sometimes", "everyone", "tomorrow",
                 "anything", "answering", "birthday", "building", "brother", "catching", "chapter", "climbing",
@@ -85,9 +88,12 @@ object FlashcardData {
                 "feeling", "forward", "friends", "frightened", "getting", "grandma", "happily", "himself", "history", "hundred",
                 "journey", "language", "leaving", "listening", "million", "mountain", "parents", "playground", "possible", "practice",
                 "present", "rainbow", "station", "straight", "surprise", "swimming", "tuesday", "usually", "village", "weekdays",
-            )
-                .map { Flashcard(prompt = it) },
+            ) + IrregularWordData.levelThreeWords),
             sentenceCards = SentenceData.levelThree.map { Flashcard(prompt = it) },
+            irregularWordCards = cardsForWords(IrregularWordData.levelThreeWords),
         ),
     )
+
+    private fun cardsForWords(words: List<String>): List<Flashcard> =
+        words.distinct().map { Flashcard(prompt = it) }
 }
