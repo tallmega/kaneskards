@@ -60,6 +60,7 @@ private val Navy = Color(0xFF15324A)
 private val Sky = Color(0xFFDDF2FF)
 private val Coral = Color(0xFFFF8A70)
 private val Gold = Color(0xFFFFD166)
+private val Lavender = Color(0xFFC7B6E8)
 private const val DefaultRoundSize = 10
 private const val RoundSizePreference = "round_size"
 private const val MinimumRoundSize = 5
@@ -151,11 +152,17 @@ private fun DeckPicker(level: CardLevel, onDeckSelected: (DeckType) -> Unit, onB
         Text("Level ${level.number}", fontSize = 36.sp, fontWeight = FontWeight.ExtraBold, color = Navy)
         Text(level.title, fontSize = 20.sp, color = Navy)
         Spacer(Modifier.height(38.dp))
-        DeckType.entries.forEachIndexed { index, deckType ->
+        DeckType.entries.forEach { deckType ->
             Card(
                 modifier = Modifier.fillMaxWidth().clickable { onDeckSelected(deckType) },
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = if (index == 0) Coral else Gold),
+                colors = CardDefaults.cardColors(
+                    containerColor = when (deckType) {
+                        DeckType.Words -> Coral
+                        DeckType.Sentences -> Gold
+                        DeckType.IrregularWords -> Lavender
+                    },
+                ),
             ) {
                 Column(modifier = Modifier.padding(26.dp)) {
                     Text(deckType.title, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Navy)
